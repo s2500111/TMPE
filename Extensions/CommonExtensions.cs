@@ -10,7 +10,10 @@ namespace OptionsFramework.Extensions
             var fi = value.GetType().GetProperty(propertyName);
             var attributes =
                 (AbstractOptionsAttribute[]) fi.GetCustomAttributes(typeof(AbstractOptionsAttribute), false);
-            return attributes.Length > 0 ? attributes[0].Description : throw new Exception($"Property {propertyName} wasn't annotated with AbstractOptionsAttribute");
+			if (attributes.Length <= 0) {
+				throw new Exception($"Property {propertyName} wasn't annotated with AbstractOptionsAttribute");
+			}
+			return attributes[0].Description; 
         }
 
         public static string GetPropertyGroup<T>(this T value, string propertyName)
@@ -18,7 +21,10 @@ namespace OptionsFramework.Extensions
             var fi = value.GetType().GetProperty(propertyName);
             var attributes =
                 (AbstractOptionsAttribute[]) fi.GetCustomAttributes(typeof(AbstractOptionsAttribute), false);
-            return attributes.Length > 0 ? attributes[0].Group : throw new Exception($"Property {propertyName} wasn't annotated with AbstractOptionsAttribute");
+			if (attributes.Length <= 0) {
+				throw new Exception($"Property {propertyName} wasn't annotated with AbstractOptionsAttribute");
+			}
+			return attributes[0].Group; 
         }
 
         public static TR GetAttribute<T, TR>(this T value, string propertyName)where TR : Attribute
