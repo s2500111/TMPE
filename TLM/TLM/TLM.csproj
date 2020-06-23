@@ -163,11 +163,13 @@
     <Compile Include="Manager\Impl\ExtNodeManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentEndManager.cs" />
     <Compile Include="Manager\Impl\ExtSegmentManager.cs" />
+    <Compile Include="Patch\_BuildingDecoration\LoadPathsPatch.cs" />
     <Compile Include="Patch\_CitizenManager\ReleaseCitizenPatch.cs" />
     <Compile Include="Patch\_DefaultTool\OnToolGUIPatch.cs" />
     <Compile Include="Patch\_InfoManager\SetModePatch.cs" />
     <Compile Include="Patch\_NetSegment\CalculateSegmentPatch.cs" />
     <Compile Include="Patch\_RoadWorldInfoPanel\OnAdjustRoadButtonPatch.cs" />
+    <Compile Include="State\AssetDataExtension.cs" />
     <Compile Include="Traffic\LegacyExtVehicleType.cs" />
     <Compile Include="UI\Helpers\NodeLaneMarker.cs" />
     <Compile Include="UI\Helpers\Prompt.cs" />
@@ -343,6 +345,7 @@
     <Compile Include="Util\Record\SegmentRecord.cs" />
     <Compile Include="Util\SeparateTurningLanesUtil.cs" />
     <Compile Include="Util\Record\RecordUtil.cs" />
+    <Compile Include="Util\SerializationUtil.cs" />
     <Compile Include="Util\Shortcuts.cs" />
     <Compile Include="Util\FloatUtil.cs" />
     <Compile Include="Util\GenericObservable.cs" />
