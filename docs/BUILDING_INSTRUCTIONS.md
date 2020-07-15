@@ -102,6 +102,8 @@ The built DLL files are automatically copied over to the local mods folder of th
 
 Once built, you should be able to test the mod in-game. Remember to enable it in **Content Manager > Mods**.
 
+If you rebuild your code while in game, your new code will be loaded (hot-reload). This only works with code inside TLM project. If no other mods are present, Hot-reload takes a few seconds (other-wise it can take minutes).
+
 If you have any problems, let us know!
 
 #### Managed DLLs
