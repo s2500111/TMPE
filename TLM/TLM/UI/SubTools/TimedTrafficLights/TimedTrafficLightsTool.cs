@@ -349,6 +349,48 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
         private void GuiTimedControlPanel(int num) {
             try {
                 TrafficLightSimulationManager tlsMan = TrafficLightSimulationManager.Instance;
+                
+                if (AddRemoveNodePanel()) {
+                    return;
+                }
+
+                // Switch back to selecting nodes, if there is no timed simulation already in place
+                if (SelectNodeSwitch()) {
+                    return;
+                }
+
+                // Get the main traffic light
+                ITimedTrafficLights timedNodeMain = tlsMan.TrafficLightSimulations[selectedNodeIds[0]].timedLight;
+
+                // Check for the current state of the light and update variables
+                if (Event.current.type == EventType.Layout) {
+                    timedLightActive = tlsMan.HasActiveTimedSimulation(selectedNodeIds[0]);
+                    currentStep = timedNodeMain.CurrentStep;
+                    inTestMode = timedNodeMain.IsInTestMode();
+                    numSteps = timedNodeMain.NumSteps();
+                }
+
+                // Reset the view when entering the edit panel after leaving
+                if (!timedLightActive && numSteps > 0 && !_timedPanelAdd && _timedEditStep < 0 &&
+                    _timedViewedStep < 0) {
+                    _timedViewedStep = 0;
+                    foreach (ushort nodeId in selectedNodeIds) {
+                        tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(_timedViewedStep)
+                              .UpdateLiveLights(true);
+                    }
+                }
+
+
+                if (timedLightActive) {
+                    DrawLightActivePanel();
+                } else {
+                    DrawLightInactivePanel();
+                }
+
+                CopyAndRotateButtons();
+
+                DragWindow(ref _windowRect);
+       
                 bool AddRemoveNodePanel() {
                     if (ttlToolMode_ == TTLToolMode.AddNode ||
                     ttlToolMode_ == TTLToolMode.RemoveNode) {
@@ -372,63 +414,22 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     }
                     return false;
                 }
-                // Call the panel for adding or removing a node from internal function if the tool
-                // is in the mod for adding or removing nodes from a traffic light
-                if (AddRemoveNodePanel()) {
-                    return;
-                }
 
-                // Switch back to selecting nodes, if there is no timed simulation already in place
-                if (SelectNodeSwitch()) {
-                    return;
-                }
-
-                // At this point, we covered every case where there's another panel then main manager panel.
-                // The main manager panel has two general modes. Either the light is active, or we can modify it.
-                // So after updating the global variables and the light, we should check which case applies and call
-                // a function for the case that's actually applicable.
-
-                // Get the main traffic light
-                ITimedTrafficLights timedNodeMain = tlsMan.TrafficLightSimulations[selectedNodeIds[0]].timedLight;
-
-                // Check for the current state of the light and update variables
-                if (Event.current.type == EventType.Layout) {
-                    timedLightActive = tlsMan.HasActiveTimedSimulation(selectedNodeIds[0]);
-                    currentStep = timedNodeMain.CurrentStep;
-                    inTestMode = timedNodeMain.IsInTestMode();
-                    numSteps = timedNodeMain.NumSteps();
-                }
-
-                // Reset the view when entering the edit panel after leaving
-                if (!timedLightActive && numSteps > 0 && !_timedPanelAdd && _timedEditStep < 0 &&
-                    _timedViewedStep < 0) {
-                    _timedViewedStep = 0;
-                    foreach (ushort nodeId in selectedNodeIds) {
-                        tlsMan.TrafficLightSimulations[nodeId].timedLight?.GetStep(_timedViewedStep)
-                              .UpdateLiveLights(true);
-                    }
-                }
-
-                // Everything should be up to date from here. Now we can check.
-                if (timedLightActive) {
-                    // Function to draw the panel in the active mode
-                    // Special case is the test mode
-                    DrawLightActivePanel();
-                } else {
-                    DrawLightInactivePanel();
-                    // We are in the edit or setup mode. Call a function for that.
-                }
-
-                CopyAndRotateButtons();
-
-                DragWindow(ref _windowRect);
-
-                // The building of the panel is done at this point, only subfunctions follow from here
                 void DrawLightActivePanel() {
-                    // just presentation of the running light.
-                    // the panel has two modes. The test mode and the normal one.
-                    // The step sensitivity bar is only shown in test mode and the current step shows flow params.
-                    // In normal mode, the flow params are only shown, when the light is beyond the minimum green time.
+                    for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
+                        GUILayout.BeginHorizontal();
+                        if (i == currentStep) { ActiveStep(i); } else { OtherStep(i); }
+                        GUILayout.EndHorizontal();
+
+                    }
+
+                    ButtonCounters();
+
+                    ButtonStop();
+
+                    LabelsFlow();
+
+                    ToggleTestMode();
 
                     void ActiveStep(int i) {
                         // contains the current time, is green or red and the skip button
@@ -568,37 +569,16 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                             tlsMan.TrafficLightSimulations[nodeId].timedLight?.SetTestMode(testMode);
                         }
                     }
-
-                    // we need to iterate over all steps and draw
-                    for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
-                        GUILayout.BeginHorizontal();
-                        // check if current step is active
-                        if (i == currentStep) { ActiveStep(i); } else { OtherStep(i); }
-                        GUILayout.EndHorizontal();
-
-                    }
-
-
-
-                    // Show counters button
-                    ButtonCounters();
-
-
-                    // Stop button
-                    ButtonStop();
-
-                    // Label for adaptive step watching mode & Label flow sensitivity & Pause in step checkbox
-                    LabelsFlow();
-
-                    ToggleTestMode();
                 }
 
                 void DrawLightInactivePanel() {
-                    // edit or setup mode
-                    // same as in an active light, there are two situations
-                    // Either a phase is normal, or in edit mode
-                    // After a phase in edit mode, there's nothing else coming.
-                    // which especially means, that we need to skip the copy and rotate buttons
+                    for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
+                        if (i == _timedEditStep) { EditStep(i); return; } else { OtherStep(i); }
+                    }
+                    if (_timedPanelAdd) { AddStep(); } else { ButtonAddStep(); ButtonStart(); }
+
+                    ButtonsAddRemoveDel();
+
                     void EditStep(int i) {
                         GUILayout.BeginHorizontal();
                         nodeSelectionLocked = true;
@@ -896,22 +876,6 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                             this.SetToolMode(TTLToolMode.SelectNode);
                         }
                     }
-
-                    // as before, we need to iterate over all steps and draw
-
-                    for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
-
-                        // check if current step is active - we got this previously
-                        if (i == _timedEditStep) { EditStep(i); return; } else { OtherStep(i); }
-
-                    }
-
-                    // Add step or edit added step // The start Button is also invisible when adding a step
-                    if (_timedPanelAdd) { AddStep(); } else { ButtonAddStep(); ButtonStart(); }
-
-                    // Add a junction, remove a junction, Delete the light
-                    ButtonsAddRemoveDel();
-
                 }
 
                 void CopyAndRotateButtons() {
