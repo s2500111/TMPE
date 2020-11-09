@@ -925,10 +925,12 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                             _timedViewedStep = 0;
                         }
 
-                        if (GUILayout.Button(T("TTL.Button:Copy"))) {
-                            TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Copy");
-                            nodeIdToCopy = selectedNodeIds[0];
-                            this.SetToolMode(TTLToolMode.CopyLights);
+                        if (_timedEditStep < 0 && !_timedPanelAdd) {
+                            if (GUILayout.Button(T("TTL.Button:Copy"))) {
+                                TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_Copy");
+                                nodeIdToCopy = selectedNodeIds[0];
+                                this.SetToolMode(TTLToolMode.CopyLights);
+                            }
                         }
 
                         if (GUILayout.Button(T("TTL.Button:Rotate right"))) {
