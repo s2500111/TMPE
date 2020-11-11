@@ -839,14 +839,16 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     }
 
                     void ButtonStart() {
-                        if (GUILayout.Button(T("TTL.Button:Start"))) {
-                            _timedPanelAdd = false;
-                            nodeSelectionLocked = false;
+                        if (timedNodeMain.NumSteps() > 0) {
+                            if (GUILayout.Button(T("TTL.Button:Start"))) {
+                                _timedPanelAdd = false;
+                                nodeSelectionLocked = false;
 
-                            foreach (ushort nodeId in selectedNodeIds) {
-                                tlsMan.TrafficLightSimulations[nodeId]
-                                      .timedLight
-                                      ?.Start();
+                                foreach (ushort nodeId in selectedNodeIds) {
+                                    tlsMan.TrafficLightSimulations[nodeId]
+                                          .timedLight
+                                          ?.Start();
+                                }
                             }
                         }
                     }
