@@ -575,9 +575,17 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                     for (var i = 0; i < timedNodeMain.NumSteps(); i++) {
                         if (i == _timedEditStep) { EditStep(i); return; } else { OtherStep(i); }
                     }
-                    if (_timedPanelAdd) { AddStep(); } else { ButtonAddStep(); ButtonStart(); }
+                    if (_timedPanelAdd)
+                    {
+                        AddStep();
+                    }
+                    else
+                    {
+                        ButtonAddStep();
+                        ButtonStart();
+                        ButtonsAddRemoveDel();
+                    }
 
-                    ButtonsAddRemoveDel();
 
                     void EditStep(int i) {
                         GUILayout.BeginHorizontal();
@@ -858,6 +866,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
 
                         if (GUILayout.Button(
                             T("TTL.Button:Add junction to TTL"))) {
+                            nodeSelectionLocked = false;
                             TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_AddJunction");
                             this.SetToolMode(TTLToolMode.AddNode);
                         }
@@ -865,6 +874,7 @@ namespace TrafficManager.UI.SubTools.TimedTrafficLights {
                         if (selectedNodeIds.Count > 1) {
                             if (GUILayout.Button(
                                 T("TTL.Button:Remove junction from TTL"))) {
+                                nodeSelectionLocked = false;
                                 TrafficManagerTool.ShowAdvisor(this.GetType().Name + "_RemoveJunction");
                                 this.SetToolMode(TTLToolMode.RemoveNode);
                             }
